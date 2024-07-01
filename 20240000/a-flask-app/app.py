@@ -1,7 +1,38 @@
 from flask import Flask, redirect, render_template, request
 import os
+import mysql.connector
+from mysql.connector import Error
 
 appWeb = Flask(__name__)
+
+
+def initialize_database():
+    try:
+        # Connessione senza specificare il database, per permettere la creazione del database stesso
+        connection = mysql.connector.connect(
+            host="its-rizzoli-idt-mysql-79834.mysql.database.azure.com",
+            user="psqladmin",
+            passwd="H@Sh1CoR3!"
+        )
+        cursor = connection.cursor()
+
+        # Leggere il contenuto del file SQL
+        with open('script.sql', 'r') as file:
+            sql_commands = file.read().split(';')
+
+        # Eseguire ogni comando SQL
+        for command in sql_commands:
+            if command.strip():  # Ignora comandi vuoti
+                cursor.execute(command)
+
+        # Commit delle modifiche
+        connection.commit()
+
+        cursor.close()
+        connection.close()
+    except Error as e:
+        print(f"The error '{e}' occurred")
+
 
 #http://www.miosito.it/prova
 #http://www.miosito.it/saluto
@@ -55,7 +86,31 @@ loggedUser = None
 
 @appWeb.route("/")
 def main():
-    return "pagina iniziale da visualizzare"
+    connection = None
+    risposta="nessuna risposta"
+    try:
+        connection = mysql.connector.connect(
+            host="its-rizzoli-idt-mysql-79834.mysql.database.azure.com",
+            user="psqladmin",
+            passwd="H@Sh1CoR3!",
+            database="database1"
+        )
+        risposta="Connection to MySQL DB successful"
+        cursor = connection.cursor()
+
+        query = ("SELECT first_name, last_name FROM employees")
+
+        
+        cursor.execute(query)
+
+        for (first_name, last_name, ) in cursor:
+            risposta = first_name
+        cursor.close()
+        connection.close()
+    except Error as e:
+        risposta=f"The error '{e}' occurred"
+    return risposta
+
 
 @appWeb.route("/prova")
 def prova():
