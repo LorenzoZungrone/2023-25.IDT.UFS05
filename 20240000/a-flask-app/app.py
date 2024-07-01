@@ -93,7 +93,7 @@ def main():
             host="its-rizzoli-idt-mysql-79834.mysql.database.azure.com",
             user="psqladmin",
             passwd="H@Sh1CoR3!",
-            database="database1"
+            database="JeremyWade"
         )
         risposta="Connection to MySQL DB successful"
         cursor = connection.cursor()
